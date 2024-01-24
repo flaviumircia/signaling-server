@@ -1,45 +1,40 @@
 package com.syncpeer.offer_exchange;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.syncpeer.offer_exchange.services.SubscribeService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.syncpeer.offer_exchange.dtos.IceCandidateWrapperDto;
+import com.syncpeer.offer_exchange.dtos.SdpOffer;
+import com.syncpeer.offer_exchange.services.SendToUserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
-@Controller
-public class SignalingController{
-    private static final Logger logger = LoggerFactory.getLogger(SignalingController.class);
+import static com.syncpeer.offer_exchange.Constants.*;
 
-    private final SubscribeService subscribeService;
+@Controller
+@Slf4j
+public class SignalingController{
+
+    private final SendToUserService sendToUserService;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public SignalingController(SubscribeService subscribeService, ObjectMapper objectMapper) {
-        this.subscribeService = subscribeService;
+    public SignalingController(SendToUserService sendToUserService, ObjectMapper objectMapper) {
+        this.sendToUserService = sendToUserService;
         this.objectMapper = objectMapper;
     }
 
-    @MessageMapping("/offer/sendOffer")
-    @SendTo("/topic/offers")
-    public String sendOffer(@Payload SdpMessage message) throws Exception {
-        logger.info("message:"+message.toString());
+    @MessageMapping(SEND_OFFER_ENDPOINT+OFFER)
+    public void sendOffer(@Payload SdpOffer offer) {
+        log.info("message:"+offer.toString());
+        sendToUserService.sendSdpToTopic("/topic/offers/"+offer.getDestination(),offer);
+    }
 
-        return objectMapper.writeValueAsString(message);
+    @MessageMapping(SEND_OFFER_ENDPOINT+ICE_OFFER)
+    public void sendIce(@Payload IceCandidateWrapperDto message){
+        log.info("Ice message: "+ message.toString());
+        sendToUserService.sendIceToTopic("/topic/iceCandidates/"+message.getDestination(),message);
     }
-    @MessageMapping("/receive/sendAnswer")
-    @SendTo("/topic/answers")
-    public String sendAnswer(@Payload SdpMessage message) throws Exception {
-        logger.info("message:"+message.toString());
-        return objectMapper.writeValueAsString(message);
-    }
-    @MessageExceptionHandler
-    @SendTo("/topic/errors")
-    public String handleException(Throwable exception) {
-        return exception.getMessage();
-    }
+
 }

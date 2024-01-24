@@ -1,4 +1,4 @@
-package com.syncpeer.offer_exchange;
+package com.syncpeer.offer_exchange.dtos;
 
 
 import lombok.Getter;
@@ -9,15 +9,14 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 public class SdpMessage {
-    private Long id;
-    private String sdpContent;
+
+    private String description;
     private String type;
 
     @Override
     public String toString() {
         return "SdpMessage{" +
-                "id=" + id +
-                ", sdpContent='" + sdpContent + '\'' +
+                "description='" + description + '\'' +
                 ", type='" + type + '\'' +
                 '}';
     }
