@@ -3,7 +3,6 @@ package com.syncpeer.offer_exchange.dtos;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Getter
